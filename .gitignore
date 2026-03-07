@@ -1,0 +1,47 @@
+### --- GENERAL / OS ---
+.DS_Store
+Thumbs.db
+desktop.ini
+*.log
+*.tmp
+
+### --- IDEs ---
+# VS Code
+.vscode/
+*.code-workspace
+
+# IntelliJ
+.idea/
+*.iws
+*.iml
+out/
+
+# NetBeans
+nbproject/private/
+nbbuild/
+dist/
+nbdist/
+.nb-gradle/
+
+### --- JAVA ---
+*.class
+*.jar
+*.war
+*.ear
+target/
+.gradle/
+build/
+
+### --- PYTHON ---
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+.env
+
+### --- DATABASES ---
+*.sqlite
+*.db
+data/
