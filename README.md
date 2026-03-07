@@ -9,10 +9,14 @@ usuario eficiente con un módulo que predice el agotamiento de stock.
 ## Arquitectura del Sistema
 El sistema sigue un diseño modular para separar la lógica de negocio, la interfaz y el análisis
 de datos:
-- **Frontend:**
-- **Backend:**
-- **Base de Datos:**
-- **Módulo Predictivo:**
+- **Interfaz de Usuario (UI):** Desarrollada con `CustomTkinter`, permitiendo una experiencia 
+  visual moderna y personalizada.
+- **Lógica de Negocio:** Implementada en Python, gestionando las transacciones y el flujo de datos
+  del sistema de cobro.
+- **Base de Datos:** Motor relacional (PostgreSQL/MySQL) para el almacenamiento persistente de
+  productos y ventas.
+- **Módulo Predictivo:** Implementación de modelos de análisis de datos para la previsión de stock
+  y fechas de resurtido.
 
 ## Estructura del Repositorio
 - *PENDIENTE*
