@@ -24,8 +24,11 @@ de datos:
 ## Colaboradores y Ética Académica
 Este es un proyecto colaborativo realizado por estudiantes del **Tecnológico Nacional de México**.
 
-## Requisitos e Instalación
-- *PENDIENTE*
+## Requisitos del Sistema
+- **Lenguaje:** Python 3.11.x (Versión mínima recomendada para optimización de recursos).
+- **Entorno Virtual:** Uso obligatorio de `venv` para la gestión de dependencias.
+- **Interfaz:** CustomTkinter (basado en estándares modernos de UI).
+- **Base de Datos:** MySQL.
 
 ---
 *Este proyecto es para fines exclusivamente académicos y de investigación técnica.*
