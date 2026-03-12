@@ -25,7 +25,8 @@ de datos:
 Este es un proyecto colaborativo realizado por estudiantes del **Tecnológico Nacional de México**.
 
 ## Requisitos del Sistema
-- **Lenguaje:** Python 3.11.x (Versión mínima recomendada para optimización de recursos).
+- **Lenguaje:** Python 3.12.x (Versión mínima recomendada para optimización de recursos).
+- **Versión de Referencia:** 3.12.13
 - **Entorno Virtual:** Uso obligatorio de `venv` para la gestión de dependencias.
 - **Interfaz:** CustomTkinter (basado en estándares modernos de UI).
 - **Base de Datos:** MySQL.
