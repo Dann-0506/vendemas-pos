@@ -1,5 +1,6 @@
 import customtkinter as ctk
 from .alert_modal import AlertModal
+from ..utils import constants as C
 
 
 class ProductFormModal(ctk.CTkToplevel):
@@ -17,7 +18,7 @@ class ProductFormModal(ctk.CTkToplevel):
         self.minsize(500, 640)
         self.resizable(False, False)
         self.attributes("-topmost", True)
-        self.configure(fg_color="#f8f9fa")
+        self.configure(fg_color=C.BG)
         self.protocol("WM_DELETE_WINDOW", self._on_close)
 
         self._build(is_edit)
@@ -44,7 +45,7 @@ class ProductFormModal(ctk.CTkToplevel):
         self.grid_rowconfigure(1, weight=1)
 
         # Franja azul de encabezado
-        header = ctk.CTkFrame(self, fg_color="#007bff", corner_radius=0, height=70)
+        header = ctk.CTkFrame(self, fg_color=C.PRIMARY, corner_radius=0, height=70)
         header.grid(row=0, column=0, sticky="ew")
         header.grid_propagate(False)
         header.grid_columnconfigure(0, weight=1)
@@ -63,8 +64,8 @@ class ProductFormModal(ctk.CTkToplevel):
                      ).grid(row=1, column=0, padx=24, sticky="w", pady=(0, 10))
 
         # Tarjeta blanca con formulario
-        card = ctk.CTkFrame(self, fg_color="#ffffff",
-                            corner_radius=12, border_width=1, border_color="#dee2e6")
+        card = ctk.CTkFrame(self, fg_color=C.CARD,
+                            corner_radius=12, border_width=1, border_color=C.BORDER)
         card.grid(row=1, column=0, padx=20, pady=20, sticky="nsew")
         card.grid_columnconfigure(0, weight=1)
         card.grid_rowconfigure(0, weight=1)
@@ -84,29 +85,29 @@ class ProductFormModal(ctk.CTkToplevel):
         ]:
             ctk.CTkLabel(scroll, text=lbl,
                          font=ctk.CTkFont(size=12, weight="bold"),
-                         text_color="#444444", anchor="w"
+                         text_color=C.TEXT_SECONDARY, anchor="w"
                          ).grid(row=len(self._entries)*2, column=0,
                                 sticky="ew", padx=16, pady=(14, 2))
             entry = ctk.CTkEntry(scroll, height=42,
                                  font=ctk.CTkFont(size=13),
-                                 fg_color="#f8f9fa",
-                                 border_color="#dee2e6", border_width=1,
-                                 text_color="#111111", corner_radius=8)
+                                 fg_color=C.BG,
+                                 border_color=C.BORDER, border_width=1,
+                                 text_color=C.TEXT_PRIMARY, corner_radius=8)
             entry.grid(row=len(self._entries)*2+1, column=0,
                        sticky="ew", padx=16, pady=(0, 2))
             self._entries[key] = entry
 
         # Barra de botones fija en la parte inferior
-        btn_bar = ctk.CTkFrame(self, fg_color="#f8f9fa",
-                               border_width=1, border_color="#dee2e6",
+        btn_bar = ctk.CTkFrame(self, fg_color=C.BG,
+                               border_width=1, border_color=C.BORDER,
                                corner_radius=0, height=64)
         btn_bar.grid(row=2, column=0, sticky="ew")
         btn_bar.grid_propagate(False)
         btn_bar.grid_columnconfigure((0, 1), weight=1)
 
         ctk.CTkButton(btn_bar, text="Cancelar",
-                      fg_color="transparent", border_width=2, border_color="#dee2e6",
-                      text_color="#333333", hover_color="#e9ecef",
+                      fg_color="transparent", border_width=2, border_color=C.BORDER,
+                      text_color=C.TEXT_SECONDARY, hover_color="#e9ecef",
                       font=ctk.CTkFont(size=13, weight="bold"),
                       height=40, corner_radius=8,
                       command=self._on_close
@@ -114,7 +115,7 @@ class ProductFormModal(ctk.CTkToplevel):
 
         ctk.CTkButton(btn_bar,
                       text="Guardar Cambios" if is_edit else "Crear Producto",
-                      fg_color="#007bff", hover_color="#0056b3",
+                      fg_color=C.PRIMARY, hover_color=C.PRIMARY_HOVER,
                       text_color="white", font=ctk.CTkFont(size=13, weight="bold"),
                       height=40, corner_radius=8,
                       command=self._guardar
