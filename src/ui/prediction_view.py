@@ -17,7 +17,7 @@ class PredictionView(ctk.CTkFrame):
 
     def __init__(self, master, controller, **kwargs):
         super().__init__(master, fg_color="transparent", **kwargs)
-        self._ctrl = controller 
+        self._ctrl = controller             # PredictionController
 
         self.grid_columnconfigure(0, weight=1)
         self.grid_rowconfigure(2, weight=1)
@@ -29,7 +29,7 @@ class PredictionView(ctk.CTkFrame):
         # Diferir carga hasta que la ventana esté renderizada
         self.after(0, self.load)
 
-    # Encabezado
+    # ── Encabezado ────────────────────────────────────────────────────────────
 
     def _build_header(self):
         f = ctk.CTkFrame(self, fg_color="transparent")
@@ -41,7 +41,7 @@ class PredictionView(ctk.CTkFrame):
                      font=ctk.CTkFont(size=13),
                      text_color=C.TEXT_SECONDARY).pack(anchor="w")
 
-    # Tarjetas de resumen
+    # ── Tarjetas de resumen ───────────────────────────────────────────────────
 
     def _build_summary_cards(self):
         self._cards_row = ctk.CTkFrame(self, fg_color="transparent")
@@ -81,7 +81,7 @@ class PredictionView(ctk.CTkFrame):
                      font=ctk.CTkFont(size=11),
                      text_color=C.TEXT_HINT).grid(row=3, column=0, padx=16, pady=(2, 14))
 
-    # Tabla 
+    # ── Tabla ─────────────────────────────────────────────────────────────────
 
     def _build_table(self):
         outer = ctk.CTkFrame(self, fg_color=C.CARD, corner_radius=C.CORNER_RADIUS_LG,
@@ -134,7 +134,7 @@ class PredictionView(ctk.CTkFrame):
         for i, (_, w, ms) in enumerate(TCOLS):
             self._rows.grid_columnconfigure(i, weight=w, minsize=ms)
 
-    # Carga y filtrado de datos
+    # ── Carga y filtrado — llama al controller ────────────────────────────────
 
     def load(self):
         self._predicciones = self._ctrl.calcular_predicciones()
@@ -186,7 +186,7 @@ class PredictionView(ctk.CTkFrame):
         else:
             estado_fg, estado_txt = C.SECONDARY, "white"
 
-        P = 14
+        P = C.ROW_PAD  # mismo padding que inventory_view
 
         ctk.CTkFrame(self._rows, height=1, fg_color=C.BORDER
                      ).grid(row=idx*2, column=0, columnspan=7, sticky="ew")
@@ -196,12 +196,12 @@ class PredictionView(ctk.CTkFrame):
         for i, (_, w, ms) in enumerate(TCOLS):
             row.grid_columnconfigure(i, weight=w, minsize=ms)
 
-        # Nombre con barra de color lateral
+        # Nombre con barra de color lateral — height fijo para no expandir la fila
         nf = ctk.CTkFrame(row, fg_color="transparent")
         nf.grid(row=0, column=0, padx=6, pady=P, sticky="ew")
         nf.grid_columnconfigure(1, weight=1)
-        ctk.CTkFrame(nf, fg_color=estado_fg, width=4,
-                     corner_radius=2).grid(row=0, column=0, sticky="ns", padx=(0, 8))
+        ctk.CTkFrame(nf, fg_color=estado_fg, width=4, height=20,
+                     corner_radius=2).grid(row=0, column=0, padx=(0, 8))
         ctk.CTkLabel(nf, text=pred.nombre,
                      font=ctk.CTkFont(size=13, weight="bold"),
                      text_color=C.TEXT_PRIMARY, anchor="w"
