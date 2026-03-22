@@ -99,7 +99,7 @@ class InventoryView(ctk.CTkFrame):
         if w > 1:
             self._hdr.configure(width=w)
 
-    # ── Datos ─────────────────────────────────────────────────────────────────
+    # Datos 
 
     def load(self):
         self._all = self._ctrl.obtener_todos()
@@ -183,7 +183,7 @@ class InventoryView(ctk.CTkFrame):
                       command=lambda p=prod: self._delete(p)
                       ).grid(row=0, column=1, sticky="ew")
 
-    # ── Acciones ──────────────────────────────────────────────────────────────
+    # Acciones
 
     def _open_create(self):
         ProductFormModal(self, self._ctrl, on_save_callback=self.load)

@@ -44,7 +44,7 @@ class VendeMasApp(ctk.CTk):
         nav_inner = ctk.CTkFrame(self.navbar, fg_color="transparent")
         nav_inner.place(relx=0, rely=0.5, anchor="w", x=30)
 
-        ctk.CTkLabel(nav_inner, text="🛒  VendeMás POS",
+        ctk.CTkLabel(nav_inner, text="VendeMás POS",
                      font=ctk.CTkFont(size=24, weight="bold"),
                      text_color=C.PRIMARY
                      ).pack(side="left", padx=(0, 40))

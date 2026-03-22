@@ -27,7 +27,7 @@ class SalesController:
         self.db    = db_manager
         self._cart: list[CartItem] = []
 
-    # ── Catálogo ──────────────────────────────────────────────────────────────
+    # Catálogo
 
     def obtener_productos_disponibles(self):
         """Devuelve productos con stock > 0."""
@@ -45,7 +45,7 @@ class SalesController:
             or texto in (p[3] or "").lower()
         ]
 
-    # ── Carrito ───────────────────────────────────────────────────────────────
+    # Carrito
 
     def agregar_al_carrito(self, id_producto: int,
                            nombre: str, precio: float) -> str | None:
@@ -93,7 +93,7 @@ class SalesController:
     def obtener_carrito(self) -> list[CartItem]:
         return list(self._cart)
 
-    # ── Totales ───────────────────────────────────────────────────────────────
+    # Totales
 
     def calcular_subtotal(self) -> float:
         return round(sum(i.subtotal for i in self._cart), 2)
@@ -112,7 +112,7 @@ class SalesController:
             "total":    self.calcular_total(),
         }
 
-    # ── Cobro ─────────────────────────────────────────────────────────────────
+    # Cobro
 
     def procesar_cobro(self) -> tuple[bool, str]:
         """
@@ -134,7 +134,7 @@ class SalesController:
         self.limpiar_carrito()
         return True, "Venta procesada correctamente."
 
-    # ── Helpers privados ──────────────────────────────────────────────────────
+    # Helpers privados
 
     def _get_producto(self, id_producto: int):
         for p in self.db.obtener_productos():

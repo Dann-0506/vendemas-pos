@@ -17,7 +17,7 @@ class PredictionView(ctk.CTkFrame):
 
     def __init__(self, master, controller, **kwargs):
         super().__init__(master, fg_color="transparent", **kwargs)
-        self._ctrl = controller             # PredictionController
+        self._ctrl = controller 
 
         self.grid_columnconfigure(0, weight=1)
         self.grid_rowconfigure(2, weight=1)
@@ -29,7 +29,7 @@ class PredictionView(ctk.CTkFrame):
         # Diferir carga hasta que la ventana esté renderizada
         self.after(0, self.load)
 
-    # ── Encabezado ────────────────────────────────────────────────────────────
+    # Encabezado
 
     def _build_header(self):
         f = ctk.CTkFrame(self, fg_color="transparent")
@@ -41,7 +41,7 @@ class PredictionView(ctk.CTkFrame):
                      font=ctk.CTkFont(size=13),
                      text_color=C.TEXT_SECONDARY).pack(anchor="w")
 
-    # ── Tarjetas de resumen ───────────────────────────────────────────────────
+    # Tarjetas de resumen
 
     def _build_summary_cards(self):
         self._cards_row = ctk.CTkFrame(self, fg_color="transparent")
@@ -81,7 +81,7 @@ class PredictionView(ctk.CTkFrame):
                      font=ctk.CTkFont(size=11),
                      text_color=C.TEXT_HINT).grid(row=3, column=0, padx=16, pady=(2, 14))
 
-    # ── Tabla ─────────────────────────────────────────────────────────────────
+    # Tabla 
 
     def _build_table(self):
         outer = ctk.CTkFrame(self, fg_color=C.CARD, corner_radius=C.CORNER_RADIUS_LG,
@@ -134,7 +134,7 @@ class PredictionView(ctk.CTkFrame):
         for i, (_, w, ms) in enumerate(TCOLS):
             self._rows.grid_columnconfigure(i, weight=w, minsize=ms)
 
-    # ── Carga y filtrado — llama al controller ────────────────────────────────
+    # Carga y filtrado de datos
 
     def load(self):
         self._predicciones = self._ctrl.calcular_predicciones()

@@ -3,8 +3,8 @@ class InventoryController:
     def __init__(self, db_manager):
         self.db = db_manager
 
-    # ── Consultas ─────────────────────────────────────────────────────────────
-
+    # Consultas
+    
     def obtener_todos(self):
         """Devuelve todos los productos activos."""
         return self.db.obtener_productos()
@@ -23,7 +23,7 @@ class InventoryController:
     def obtener_por_codigo(self, codigo: str):
         return self.db.obtener_producto_por_codigo(codigo)
 
-    # ── Validación ────────────────────────────────────────────────────────────
+    # Validación
 
     def validar_campos(self, nombre, precio_str, stock_str) -> str | None:
         """
@@ -46,7 +46,7 @@ class InventoryController:
             return "El stock debe ser un número entero no negativo."
         return None
 
-    # ── CRUD ──────────────────────────────────────────────────────────────────
+    # CRUD
 
     def crear(self, nombre, descripcion, codigo_barras,
               precio_str, stock_str, categoria) -> str | None:

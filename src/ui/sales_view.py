@@ -16,7 +16,7 @@ class SalesView(ctk.CTkFrame):
 
     def __init__(self, master, controller, **kwargs):
         super().__init__(master, fg_color="transparent", **kwargs)
-        self._ctrl = controller             # SalesController
+        self._ctrl = controller
 
         self.grid_columnconfigure(0, weight=3)
         self.grid_columnconfigure(1, weight=2)
@@ -26,10 +26,9 @@ class SalesView(ctk.CTkFrame):
         self._build_products_panel()
         self._build_cart_panel()
 
-        # Diferir carga hasta que la ventana esté renderizada
         self.after(0, self._refresh_products)
 
-    # ── Encabezado ────────────────────────────────────────────────────────────
+    # Encabezado 
 
     def _build_header(self):
         f = ctk.CTkFrame(self, fg_color="transparent")
@@ -41,7 +40,7 @@ class SalesView(ctk.CTkFrame):
                      font=ctk.CTkFont(size=13),
                      text_color=C.TEXT_SECONDARY).pack(anchor="w")
 
-    # ── Panel izquierdo: catálogo ─────────────────────────────────────────────
+    # Panel izquierdo: catálogo de productos
 
     def _build_products_panel(self):
         panel = ctk.CTkFrame(self, fg_color=C.CARD, corner_radius=C.CORNER_RADIUS_LG,
@@ -135,8 +134,7 @@ class SalesView(ctk.CTkFrame):
                           self._add_to_cart(i, n, p)
                       ).grid(row=5, column=0, padx=10, pady=(0, 12), sticky="ew")
 
-    # ── Panel derecho: carrito ────────────────────────────────────────────────
-
+    # Panel derecho: carrito y ventas recientes
     def _build_cart_panel(self):
         self._cart_panel = ctk.CTkFrame(self, fg_color=C.CARD,
                                         corner_radius=C.CORNER_RADIUS_LG,
@@ -325,7 +323,7 @@ class SalesView(ctk.CTkFrame):
                          text_color=C.TEXT_PRIMARY
                          ).grid(row=0, column=2, padx=12)
 
-    # ── Acciones — delega al controller ──────────────────────────────────────
+    # Acciones
 
     def _add_to_cart(self, id_producto, nombre, precio):
         error = self._ctrl.agregar_al_carrito(id_producto, nombre, precio)

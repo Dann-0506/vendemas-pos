@@ -33,7 +33,7 @@ class PredictionController:
     def __init__(self, db_manager):
         self.db = db_manager
 
-    # ── Predicción principal ──────────────────────────────────────────────────
+    # Predicción principal
 
     def calcular_predicciones(self) -> list[ProductoPrediction]:
         """
@@ -105,7 +105,7 @@ class PredictionController:
             p.dias_restantes if p.dias_restantes is not None else 9999
         ))
 
-    # ── Resumen ───────────────────────────────────────────────────────────────
+    # Resumen
 
     def obtener_resumen(self) -> dict:
         """
@@ -124,7 +124,7 @@ class PredictionController:
             "dias_analizados": self.VENTANA_DIAS,
         }
 
-    # ── Helpers privados ──────────────────────────────────────────────────────
+    # Helpers privados
 
     def _clasificar(self, dias_restantes: int) -> str:
         if dias_restantes <= self.UMBRAL_CRITICO:
