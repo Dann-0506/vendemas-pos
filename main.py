@@ -25,12 +25,20 @@ def bootstrap():
     # 2. Capa de datos
     db = POSDatabase(str(db_path))
 
-    # 3. Controllers
+    # 3. Datos de prueba (solo si la BD está vacía)
+    if not db.obtener_productos():
+        print("-> Base de datos vacía. Insertando productos de prueba...")
+        db.crear_producto("Coca Cola 600ml",   "Refresco de cola",    "750105530001", 18.50, 50, "Bebidas")
+        db.crear_producto("Papas Saladas 45g", "Snack de papa",       "750105530002", 15.00, 12, "Botanas")
+        db.crear_producto("Leche Entera 1L",   "Lácteo pasteurizado", "750105530003", 24.50,  4, "Básicos")
+        db.crear_producto("Chocolate Amargo",  "Barra 70% cacao",     "750105530004", 35.00, 25, "Dulces")
+
+    # 4. Controllers
     inventory_ctrl  = InventoryController(db)
     sales_ctrl      = SalesController(db)
     prediction_ctrl = PredictionController(db)
 
-    # 4. Ventana principal
+    # 5. Ventana principal
     app = VendeMasApp(
         inventory_ctrl  = inventory_ctrl,
         sales_ctrl      = sales_ctrl,
