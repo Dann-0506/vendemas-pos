@@ -30,20 +30,15 @@ class SalesController:
     # Catálogo
 
     def obtener_productos_disponibles(self):
-        """Devuelve productos con stock > 0."""
-        return [p for p in self.db.obtener_productos() if p[5] > 0]
+        """Devuelve productos con stock > 0 usando SQL."""
+        return self.db.obtener_productos(solo_activos=True, con_stock=True)
 
     def buscar_producto(self, texto: str):
-        """Filtra productos disponibles por nombre, categoría o código."""
+        """Filtra productos disponibles por nombre, categoría o código usando SQL."""
         texto = texto.lower().strip()
         if not texto:
             return self.obtener_productos_disponibles()
-        return [
-            p for p in self.obtener_productos_disponibles()
-            if texto in (p[1] or "").lower()
-            or texto in (p[6] or "").lower()
-            or texto in (p[3] or "").lower()
-        ]
+        return self.db.buscar_productos(texto, solo_con_stock=True)
 
     # Carrito
 
@@ -53,15 +48,22 @@ class SalesController:
         Agrega o incrementa un producto en el carrito.
         Retorna mensaje de error o None si tuvo éxito.
         """
-        producto = self.db.obtener_producto_por_codigo(str(id_producto))
-        # Verificar stock disponible
+        # Verificar stock disponible consultando solo el producto necesario
+        prod = self.db.obtener_producto_por_id(id_producto)
+        if not prod:
+            return f"Producto '{nombre}' no encontrado."
+        
+        stock_actual = prod[5]
+        
         for item in self._cart:
             if item.id_producto == id_producto:
-                prod = self._get_producto(id_producto)
-                if prod and item.cantidad >= prod[5]:
+                if item.cantidad >= stock_actual:
                     return f"Stock insuficiente para '{nombre}'."
                 item.cantidad += 1
                 return None
+
+        if stock_actual <= 0:
+            return f"Stock insuficiente para '{nombre}'."
 
         self._cart.append(CartItem(id_producto, nombre, precio))
         return None
@@ -77,7 +79,8 @@ class SalesController:
                 if nueva <= 0:
                     self._cart.remove(item)
                     return None
-                prod = self._get_producto(id_producto)
+                
+                prod = self.db.obtener_producto_por_id(id_producto)
                 if delta > 0 and prod and nueva > prod[5]:
                     return f"Stock insuficiente para '{item.nombre}'."
                 item.cantidad = nueva
@@ -116,23 +119,17 @@ class SalesController:
 
     def procesar_cobro(self) -> tuple[bool, str]:
         """
-        Registra todas las ventas del carrito y descuenta el stock.
-        Retorna (éxito, mensaje).
+        Registra todas las ventas del carrito en una sola transacción.
         """
         if not self._cart:
             return False, "El carrito está vacío."
 
-        errores = []
-        for item in self._cart:
-            resultado = self.db.registrar_venta(item.id_producto, item.cantidad)
-            if resultado != "Venta registrada":
-                errores.append(f"{item.nombre}: {resultado}")
-
-        if errores:
-            return False, "Errores al procesar:\n" + "\n".join(errores)
-
-        self.limpiar_carrito()
-        return True, "Venta procesada correctamente."
+        exito, mensaje = self.db.procesar_venta_lote(self._cart)
+        
+        if exito:
+            self.limpiar_carrito()
+            
+        return exito, mensaje
 
     # Helpers privados
 
