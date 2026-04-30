@@ -1,3 +1,4 @@
+import threading
 import customtkinter as ctk
 from ..utils import constants as C
 
@@ -18,6 +19,8 @@ class PredictionView(ctk.CTkFrame):
     def __init__(self, master, controller, **kwargs):
         super().__init__(master, fg_color="transparent", **kwargs)
         self._ctrl = controller             # PredictionController
+        self._predicciones = []             # Cache de datos para filtrado
+        self._active_filter = "Todos"       # Filtro inicial
 
         self.grid_columnconfigure(0, weight=1)
         self.grid_rowconfigure(2, weight=1)
@@ -27,7 +30,7 @@ class PredictionView(ctk.CTkFrame):
         self._build_table()
 
         # Diferir carga hasta que la ventana esté renderizada
-        self.after(0, self.load)
+        # self.after(0, self.load) # Se carga manualmente al mostrar la vista
 
     # ── Encabezado ────────────────────────────────────────────────────────────
 
@@ -137,22 +140,21 @@ class PredictionView(ctk.CTkFrame):
     # ── Carga y filtrado — llama al controller ────────────────────────────────
 
     def load(self):
-        """Carga datos de forma asíncrona para no bloquear la UI."""
+        """Carga datos de forma síncrona para asegurar visibilidad."""
         self._show_loading(True)
+        self.update() # Forzar dibujado del estado de carga
         
-        def _task():
-            try:
-                # Forzar recálculo la primera vez, el resumen usará ese cache
-                data = self._ctrl.calcular_predicciones(use_cache=False)
-                resumen = self._ctrl.obtener_resumen()
-                self.after(0, lambda: self._on_load_complete(data, resumen))
-            except Exception as e:
-                print(f"Error cargando predicciones: {e}")
-                self.after(0, lambda: self._show_error(str(e)))
-
-        threading.Thread(target=_task, daemon=True).start()
+        try:
+            # Forzar recálculo la primera vez, el resumen usará ese cache
+            data = self._ctrl.calcular_predicciones(use_cache=False)
+            resumen = self._ctrl.obtener_resumen()
+            self._on_load_complete(data, resumen)
+        except Exception as e:
+            self._show_error(str(e))
 
     def _on_load_complete(self, data, resumen):
+        if not self.winfo_exists():
+            return
         self._show_loading(False)
         self._predicciones = data
         self._refresh_summary(resumen)

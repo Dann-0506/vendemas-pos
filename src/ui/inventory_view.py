@@ -1,3 +1,4 @@
+import threading
 import customtkinter as ctk
 from .product_form_modal import ProductFormModal
 from .confirm_delete_modal import ConfirmDeleteModal
@@ -35,7 +36,7 @@ class InventoryView(ctk.CTkFrame):
         self._build_header()
         self._build_toolbar()
         self._build_table()
-        self.after(0, self.load)
+        # self.after(0, self.load) # Se carga manualmente al mostrar la vista
 
     def _build_header(self):
         f = ctk.CTkFrame(self, fg_color="transparent")
@@ -102,29 +103,26 @@ class InventoryView(ctk.CTkFrame):
     # Datos 
 
     def load(self):
-        """Carga todos los productos de forma asíncrona."""
-        def _task():
+        """Carga los productos de forma síncrona."""
+        try:
             data = self._ctrl.obtener_todos()
-            self.after(0, lambda: self._render(data))
-        
-        threading.Thread(target=_task, daemon=True).start()
-
-    def _on_search_change(self, *args):
-        """Debouncing para no saturar la DB en cada tecla."""
-        if self._search_timer:
-            self.after_cancel(self._search_timer)
-        self._search_timer = self.after(300, self._filter)
+            self._render(data)
+        except Exception:
+            pass
 
     def _filter(self):
-        """Realiza la búsqueda de forma asíncrona."""
+        """Realiza la búsqueda de forma síncrona."""
         query = self._search_var.get()
-        def _task():
+        try:
             data = self._ctrl.buscar(query)
-            self.after(0, lambda: self._render(data))
-        
-        threading.Thread(target=_task, daemon=True).start()
+            self._render(data)
+        except Exception:
+            pass
 
     def _render(self, productos):
+        if not self.winfo_exists():
+            return
+        
         for w in self._rows.winfo_children():
             w.destroy()
 

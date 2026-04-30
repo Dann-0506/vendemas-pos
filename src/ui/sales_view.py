@@ -28,7 +28,7 @@ class SalesView(ctk.CTkFrame):
         self._build_cart_panel()
 
         self._search_timer = None
-        self.after(0, self._refresh_products)
+        # self.after(0, self._refresh_products) # Se carga manualmente al mostrar la vista
 
     # Encabezado 
 
@@ -80,14 +80,15 @@ class SalesView(ctk.CTkFrame):
 
     def _refresh_products(self):
         q = self._search_var.get() if hasattr(self, '_search_var') else ""
-        
-        def _task():
+        try:
             products = self._ctrl.buscar_producto(q)
-            self.after(0, lambda: self._render_products(products))
-        
-        threading.Thread(target=_task, daemon=True).start()
+            self._render_products(products)
+        except Exception:
+            pass
 
     def _render_products(self, products):
+        if not self.winfo_exists():
+            return
         for w in self._grid_frame.winfo_children():
             w.destroy()
 
