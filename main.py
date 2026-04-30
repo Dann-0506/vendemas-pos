@@ -51,6 +51,9 @@ def bootstrap():
         app.mainloop()
     except Exception as e:
         print(f"!!! Error crítico en el ciclo principal: {e}")
+    finally:
+        db.close()
+        print("-> Conexión a la base de datos cerrada.")
 
 
 if __name__ == "__main__":
