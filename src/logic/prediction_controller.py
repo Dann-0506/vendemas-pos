@@ -20,7 +20,6 @@ class PredictionController:
     Algoritmo predictivo de agotamiento de inventario.
     Calcula cuántos días le quedan a cada producto
     basándose en el historial real de ventas.
-    No importa customtkinter.
     """
 
     # Umbrales de clasificación (días restantes)
@@ -32,45 +31,35 @@ class PredictionController:
 
     def __init__(self, db_manager):
         self.db = db_manager
+        self._cache_predicciones: list[ProductoPrediction] | None = None
+
+    def limpiar_cache(self):
+        self._cache_predicciones = None
 
     # Predicción principal
 
-    def calcular_predicciones(self) -> list[ProductoPrediction]:
+    def calcular_predicciones(self, use_cache=True) -> list[ProductoPrediction]:
         """
-        Genera la predicción de agotamiento para todos los productos.
-        Usa el historial de ventas de los últimos VENTANA_DIAS días.
+        Genera la predicción de agotamiento usando agregaciones SQL.
         """
-        productos = self.db.obtener_productos()
-        ventas    = self.db.obtener_ventas()
-        hoy       = datetime.now()
+        if use_cache and self._cache_predicciones is not None:
+            return self._cache_predicciones
 
-        # Agrupar ventas por id_producto dentro de la ventana de análisis
-        # Estructura de venta: (id_venta, id_producto, cantidad, precio, total, fecha)
-        ventas_por_producto: dict[int, float] = {}
-        for venta in ventas:
-            try:
-                fecha_venta = datetime.strptime(venta[5][:10], "%Y-%m-%d")
-            except (ValueError, IndexError):
-                continue
-            if (hoy - fecha_venta).days <= self.VENTANA_DIAS:
-                id_prod = venta[1]
-                ventas_por_producto[id_prod] = (
-                    ventas_por_producto.get(id_prod, 0) + venta[2]
-                )
+        productos = self.db.obtener_productos()
+        ventas_totales = self.db.obtener_agregados_ventas(self.VENTANA_DIAS)
+        hoy = datetime.now()
 
         predicciones = []
         for prod in productos:
-            # prod: (id, nombre, descripcion, codigo_barras, precio, stock, categoria, activo)
             id_prod   = prod[0]
             nombre    = prod[1]
             categoria = prod[6] or "—"
             stock     = prod[5]
 
-            total_vendido = ventas_por_producto.get(id_prod, 0)
+            total_vendido = ventas_totales.get(id_prod, 0)
             venta_diaria  = round(total_vendido / self.VENTANA_DIAS, 2)
 
             if venta_diaria <= 0:
-                # Sin ventas en la ventana de análisis
                 predicciones.append(ProductoPrediction(
                     id_producto        = id_prod,
                     nombre             = nombre,
@@ -98,20 +87,16 @@ class PredictionController:
                 estado             = estado
             ))
 
-        # Ordenar: críticos primero, luego por días restantes ascendente
-        return sorted(predicciones, key=lambda p: (
-            {"CRÍTICO": 0, "RIESGO": 1, "ESTABLE": 2, "SIN MOVIMIENTO": 3}
-            .get(p.estado, 4),
+        self._cache_predicciones = sorted(predicciones, key=lambda p: (
+            {"CRÍTICO": 0, "RIESGO": 1, "ESTABLE": 2, "SIN MOVIMIENTO": 3}.get(p.estado, 4),
             p.dias_restantes if p.dias_restantes is not None else 9999
         ))
+        return self._cache_predicciones
 
-    # Resumen
-
+    # Resumen optimizado
     def obtener_resumen(self) -> dict:
-        """
-        Devuelve conteos por estado para las tarjetas de resumen.
-        """
-        predicciones = self.calcular_predicciones()
+        """Calcula el resumen usando el cache si está disponible."""
+        predicciones = self.calcular_predicciones(use_cache=True)
         conteos = {"CRÍTICO": 0, "RIESGO": 0, "ESTABLE": 0, "SIN MOVIMIENTO": 0}
         for p in predicciones:
             conteos[p.estado] = conteos.get(p.estado, 0) + 1

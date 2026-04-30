@@ -10,15 +10,11 @@ class InventoryController:
         return self.db.obtener_productos()
 
     def buscar(self, texto: str):
-        """Filtra productos por nombre o categoría (case-insensitive)."""
+        """Filtra productos por nombre, categoría o código usando SQL."""
         texto = texto.lower().strip()
         if not texto:
             return self.obtener_todos()
-        return [
-            p for p in self.obtener_todos()
-            if texto in (p[1] or "").lower()
-            or texto in (p[6] or "").lower()
-        ]
+        return self.db.buscar_productos(texto)
 
     def obtener_por_codigo(self, codigo: str):
         return self.db.obtener_producto_por_codigo(codigo)
