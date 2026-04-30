@@ -1,3 +1,4 @@
+import threading
 import customtkinter as ctk
 from ..utils import constants as C
 
@@ -26,7 +27,8 @@ class SalesView(ctk.CTkFrame):
         self._build_products_panel()
         self._build_cart_panel()
 
-        self.after(0, self._refresh_products)
+        self._search_timer = None
+        # self.after(0, self._refresh_products) # Se carga manualmente al mostrar la vista
 
     # Encabezado 
 
@@ -57,7 +59,7 @@ class SalesView(ctk.CTkFrame):
                      text_color=C.TEXT_PRIMARY).grid(row=0, column=0, sticky="w")
 
         self._search_var = ctk.StringVar()
-        self._search_var.trace_add("write", lambda *_: self._refresh_products())
+        self._search_var.trace_add("write", self._on_search_change)
         ctk.CTkEntry(panel, textvariable=self._search_var,
                      placeholder_text="Buscar producto o escanear código...",
                      height=40, font=ctk.CTkFont(size=13),
@@ -71,10 +73,22 @@ class SalesView(ctk.CTkFrame):
         for c in range(self._N_COLS):
             self._grid_frame.grid_columnconfigure(c, weight=1, uniform="prod_col")
 
-    def _refresh_products(self):
-        q        = self._search_var.get() if hasattr(self, '_search_var') else ""
-        products = self._ctrl.buscar_producto(q)
+    def _on_search_change(self, *args):
+        if self._search_timer:
+            self.after_cancel(self._search_timer)
+        self._search_timer = self.after(300, self._refresh_products)
 
+    def _refresh_products(self):
+        q = self._search_var.get() if hasattr(self, '_search_var') else ""
+        try:
+            products = self._ctrl.buscar_producto(q)
+            self._render_products(products)
+        except Exception:
+            pass
+
+    def _render_products(self, products):
+        if not self.winfo_exists():
+            return
         for w in self._grid_frame.winfo_children():
             w.destroy()
 
@@ -84,7 +98,10 @@ class SalesView(ctk.CTkFrame):
                          ).grid(row=0, column=0, columnspan=self._N_COLS, pady=30)
             return
 
-        for idx, prod in enumerate(products):
+        # Limitar a 48 productos para evitar saturar el grid de Tkinter
+        display_list = products[:48]
+
+        for idx, prod in enumerate(display_list):
             accent = CATEGORY_COLORS.get(prod[6] or "", DEFAULT_ACCENT)
             self._make_product_card(
                 self._grid_frame,
@@ -97,6 +114,11 @@ class SalesView(ctk.CTkFrame):
                 row         = idx // self._N_COLS,
                 col         = idx % self._N_COLS,
             )
+        
+        if len(products) > 48:
+             ctk.CTkLabel(self._grid_frame, text=f"+ {len(products)-48} productos adicionales. Refina tu búsqueda.",
+                         font=ctk.CTkFont(size=11, slant="italic"), text_color=C.TEXT_HINT
+                         ).grid(row=(48 // self._N_COLS) + 1, column=0, columnspan=self._N_COLS, pady=10)
 
     def _make_product_card(self, parent, id_producto, nombre, categoria,
                            precio, stock, accent, row, col):
@@ -294,8 +316,8 @@ class SalesView(ctk.CTkFrame):
                      text_color=C.TEXT_MUTED
                      ).grid(row=0, column=0, sticky="w", pady=(0, 6))
 
-        ventas    = self._ctrl.db.obtener_ventas()
-        recientes = list(reversed(ventas[-3:])) if ventas else []
+        ventas    = self._ctrl.db.obtener_ventas_recientes(limite=3)
+        recientes = ventas
 
         if not recientes:
             ctk.CTkLabel(self._recent_frame, text="Sin ventas registradas aún.",
@@ -350,7 +372,13 @@ class SalesView(ctk.CTkFrame):
         self._refresh_cart()
 
     def _procesar_cobro(self):
-        exito, mensaje = self._ctrl.procesar_cobro()
+        def _task():
+            exito, mensaje = self._ctrl.procesar_cobro()
+            self.after(0, lambda: self._on_cobro_complete(exito, mensaje))
+        
+        threading.Thread(target=_task, daemon=True).start()
+
+    def _on_cobro_complete(self, exito, mensaje):
         if exito:
             self._refresh_cart()
             self._refresh_products()

@@ -94,16 +94,19 @@ class VendeMasApp(ctk.CTk):
         for widget in self.main_container.winfo_children():
             widget.destroy()
 
+        self.update() # Asegurar que el contenedor esté listo antes de crear la vista
+
         if context == "ventas":
-            SalesView(self.main_container, self._sales_ctrl).pack(
-                expand=True, fill="both", padx=20, pady=20)
+            v = SalesView(self.main_container, self._sales_ctrl)
+            v.pack(expand=True, fill="both", padx=20, pady=20)
+            v._refresh_products()
 
         elif context == "inventario":
-            InventoryView(self.main_container, self._inventory_ctrl).pack(
-                expand=True, fill="both", padx=20, pady=20)
+            v = InventoryView(self.main_container, self._inventory_ctrl)
+            v.pack(expand=True, fill="both", padx=20, pady=20)
+            v.load()
 
         elif context == "prediccion":
-            PredictionView(self.main_container, self._prediction_ctrl).pack(
-                expand=True, fill="both", padx=20, pady=20)
-
-        self.update()
+            v = PredictionView(self.main_container, self._prediction_ctrl)
+            v.pack(expand=True, fill="both", padx=20, pady=20)
+            v.load()

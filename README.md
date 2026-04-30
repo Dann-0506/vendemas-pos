@@ -1,38 +1,48 @@
 # VendeMás - Sistema POS con Análisis Predictivo
 
 ## Descripción
-**VendeMás** es un sistema de Punto de Venta (POS) diseñado para optimizar la gestión comercial
-de tiendas de abarrotes y minisúper en el estado de Veracruz. El proyecto nace como un prototipo
-académico para la materia de **Arquitectura de Computadoras**, buscando integrar una interfaz de
-usuario eficiente con un módulo que predice el agotamiento de stock.
+**VendeMás** es un sistema de Punto de Venta (POS) diseñado para optimizar la gestión comercial de tiendas de abarrotes y minisúper. El sistema integra una interfaz de usuario moderna con un potente módulo de análisis predictivo que estima cuándo se agotará el stock de cada producto basándose en el historial de ventas.
+
+## Características Principales
+- **Punto de Venta Eficiente:** Interfaz optimizada para el registro rápido de ventas con soporte para búsqueda por nombre o código de barras.
+- **Gestión de Inventario:** Control completo de catálogo, precios y niveles de existencias en tiempo real.
+- **Análisis Predictivo:** Algoritmo que calcula el agotamiento de stock, clasificando productos en estados de riesgo (Crítico, Riesgo, Estable) y estimando fechas de resurtido.
+- **Arquitectura Robusta:** Diseño modular que garantiza la estabilidad del sistema y la integridad de los datos mediante transacciones atómicas.
 
 ## Arquitectura del Sistema
-El sistema sigue un diseño modular para separar la lógica de negocio, la interfaz y el análisis
-de datos:
-- **Interfaz de Usuario (UI):** Desarrollada con `CustomTkinter`, permitiendo una experiencia 
-  visual moderna y personalizada.
-- **Lógica de Negocio:** Implementada en Python, gestionando las transacciones y el flujo de datos
-  del sistema de cobro.
-- **Base de Datos:** Motor relacional (PostgreSQL/MySQL) para el almacenamiento persistente de
-  productos y ventas.
-- **Módulo Predictivo:** Implementación de modelos de análisis de datos para la previsión de stock
-  y fechas de resurtido.
+El sistema sigue un diseño modular para separar responsabilidades:
+- **UI (src/ui):** Construida con `CustomTkinter`, ofreciendo una experiencia visual moderna y adaptativa.
+- **Lógica (src/logic):** Controladores especializados para ventas, inventario y predicciones.
+- **Persistencia (src/logic/database_controller.py):** Gestión de base de datos SQLite con optimizaciones mediante índices y manejo de concurrencia.
+- **Utilidades (src/utils):** Centralización de constantes estéticas y configuraciones globales.
 
-## Estructura del Repositorio
-- *PENDIENTE*
+## Estructura del Proyecto
+```text
+VendeMas/
+├── main.py                 # Punto de entrada de la aplicación
+├── requirements.txt        # Dependencias del proyecto
+├── database/               # Almacenamiento de la base de datos SQLite
+└── src/
+    ├── logic/              # Controladores de negocio y persistencia
+    ├── ui/                 # Vistas y componentes de la interfaz
+    └── utils/              # Constantes y utilidades globales
+```
 
-## Colaboradores y Ética Académica
-Este es un proyecto colaborativo realizado por estudiantes del **Tecnológico Nacional de México**.
+## Requisitos y Configuración
+- **Lenguaje:** Python 3.12.x
+- **Entorno Virtual:** Se recomienda el uso de `venv`.
+- **Dependencias:** Instalación mediante `pip install -r requirements.txt`.
 
-## Requisitos del Sistema
-- **Lenguaje:** Python 3.12.x (Versión mínima recomendada para optimización de recursos).
-- **Versión de Referencia:** 3.12.13
-- **Entorno Virtual:** Uso obligatorio de `venv` para la gestión de dependencias.
-- **Interfaz:** CustomTkinter (basado en estándares modernos de UI).
-- **Base de Datos:** SQLite.
+### Ejecución
+Para iniciar el sistema:
+```bash
+python3 main.py
+```
 
-## Colaboradores
-- Daniel Landero Arias
-- Rafael Solano Alvarado
+## Ética Académica y Colaboradores
+Este proyecto es un prototipo desarrollado por estudiantes del **Tecnológico Nacional de México** para la materia de **Arquitectura de Computadoras**.
 
-*Este proyecto es para fines exclusivamente académicos y de investigación técnica.*
+- **Daniel Landero Arias**
+- **Rafael Solano Alvarado**
+
+*Este proyecto tiene fines exclusivamente académicos y de investigación técnica.*

@@ -1,3 +1,4 @@
+import threading
 import customtkinter as ctk
 from ..utils import constants as C
 
@@ -18,6 +19,8 @@ class PredictionView(ctk.CTkFrame):
     def __init__(self, master, controller, **kwargs):
         super().__init__(master, fg_color="transparent", **kwargs)
         self._ctrl = controller             # PredictionController
+        self._predicciones = []             # Cache de datos para filtrado
+        self._active_filter = "Todos"       # Filtro inicial
 
         self.grid_columnconfigure(0, weight=1)
         self.grid_rowconfigure(2, weight=1)
@@ -27,7 +30,7 @@ class PredictionView(ctk.CTkFrame):
         self._build_table()
 
         # Diferir carga hasta que la ventana esté renderizada
-        self.after(0, self.load)
+        # self.after(0, self.load) # Se carga manualmente al mostrar la vista
 
     # ── Encabezado ────────────────────────────────────────────────────────────
 
@@ -137,10 +140,41 @@ class PredictionView(ctk.CTkFrame):
     # ── Carga y filtrado — llama al controller ────────────────────────────────
 
     def load(self):
-        self._predicciones = self._ctrl.calcular_predicciones()
-        self._refresh_summary(self._ctrl.obtener_resumen())
+        """Carga datos de forma síncrona para asegurar visibilidad."""
+        self._show_loading(True)
+        self.update() # Forzar dibujado del estado de carga
+        
+        try:
+            # Forzar recálculo la primera vez, el resumen usará ese cache
+            data = self._ctrl.calcular_predicciones(use_cache=False)
+            resumen = self._ctrl.obtener_resumen()
+            self._on_load_complete(data, resumen)
+        except Exception as e:
+            self._show_error(str(e))
+
+    def _on_load_complete(self, data, resumen):
+        if not self.winfo_exists():
+            return
+        self._show_loading(False)
+        self._predicciones = data
+        self._refresh_summary(resumen)
         self._active_filter = "Todos"
         self._render(self._predicciones)
+
+    def _show_loading(self, show=True):
+        for w in self._rows.winfo_children():
+            w.destroy()
+        if show:
+            ctk.CTkLabel(self._rows, text="Calculando predicciones... por favor espera.",
+                         font=ctk.CTkFont(size=14), text_color=C.PRIMARY
+                         ).grid(row=0, column=0, columnspan=7, pady=100)
+
+    def _show_error(self, msg):
+        for w in self._rows.winfo_children():
+            w.destroy()
+        ctk.CTkLabel(self._rows, text=f"Error al calcular: {msg}",
+                     font=ctk.CTkFont(size=14), text_color=C.DANGER
+                     ).grid(row=0, column=0, columnspan=7, pady=100)
 
     def _apply_filter(self, filtro):
         self._active_filter = filtro

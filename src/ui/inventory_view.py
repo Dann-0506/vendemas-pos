@@ -1,3 +1,4 @@
+import threading
 import customtkinter as ctk
 from .product_form_modal import ProductFormModal
 from .confirm_delete_modal import ConfirmDeleteModal
@@ -35,7 +36,7 @@ class InventoryView(ctk.CTkFrame):
         self._build_header()
         self._build_toolbar()
         self._build_table()
-        self.after(0, self.load)
+        # self.after(0, self.load) # Se carga manualmente al mostrar la vista
 
     def _build_header(self):
         f = ctk.CTkFrame(self, fg_color="transparent")
@@ -102,14 +103,26 @@ class InventoryView(ctk.CTkFrame):
     # Datos 
 
     def load(self):
-        self._all = self._ctrl.obtener_todos()
-        self._filter()
+        """Carga los productos de forma síncrona."""
+        try:
+            data = self._ctrl.obtener_todos()
+            self._render(data)
+        except Exception:
+            pass
 
     def _filter(self):
-        data = self._ctrl.buscar(self._search_var.get())
-        self._render(data)
+        """Realiza la búsqueda de forma síncrona."""
+        query = self._search_var.get()
+        try:
+            data = self._ctrl.buscar(query)
+            self._render(data)
+        except Exception:
+            pass
 
     def _render(self, productos):
+        if not self.winfo_exists():
+            return
+        
         for w in self._rows.winfo_children():
             w.destroy()
 
@@ -119,8 +132,16 @@ class InventoryView(ctk.CTkFrame):
                          ).grid(row=0, column=0, columnspan=6, pady=50)
             return
 
-        for idx, prod in enumerate(productos):
+        # Limitar renderizado a los primeros 100 para mantener fluidez
+        display_list = productos[:100]
+        
+        for idx, prod in enumerate(display_list):
             self._make_row(idx, prod, C.CARD if idx % 2 == 0 else "#f4f6f8")
+            
+        if len(productos) > 100:
+             ctk.CTkLabel(self._rows, text=f"... y {len(productos)-100} productos más (usa el buscador para filtrar)",
+                         font=ctk.CTkFont(size=12, slant="italic"), text_color=C.TEXT_HINT
+                         ).grid(row=201, column=0, columnspan=6, pady=10)
 
     def _make_row(self, idx, prod, bg):
         P = self.ROW_PAD
