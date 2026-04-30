@@ -31,5 +31,8 @@ Este es un proyecto colaborativo realizado por estudiantes del **Tecnológico Na
 - **Interfaz:** CustomTkinter (basado en estándares modernos de UI).
 - **Base de Datos:** SQLite.
 
----
+## Colaboradores
+- Daniel Landero Arias
+- Rafael Solano Alvarado
+
 *Este proyecto es para fines exclusivamente académicos y de investigación técnica.*
