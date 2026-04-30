@@ -102,12 +102,27 @@ class InventoryView(ctk.CTkFrame):
     # Datos 
 
     def load(self):
-        self._all = self._ctrl.obtener_todos()
-        self._filter()
+        """Carga todos los productos de forma asíncrona."""
+        def _task():
+            data = self._ctrl.obtener_todos()
+            self.after(0, lambda: self._render(data))
+        
+        threading.Thread(target=_task, daemon=True).start()
+
+    def _on_search_change(self, *args):
+        """Debouncing para no saturar la DB en cada tecla."""
+        if self._search_timer:
+            self.after_cancel(self._search_timer)
+        self._search_timer = self.after(300, self._filter)
 
     def _filter(self):
-        data = self._ctrl.buscar(self._search_var.get())
-        self._render(data)
+        """Realiza la búsqueda de forma asíncrona."""
+        query = self._search_var.get()
+        def _task():
+            data = self._ctrl.buscar(query)
+            self.after(0, lambda: self._render(data))
+        
+        threading.Thread(target=_task, daemon=True).start()
 
     def _render(self, productos):
         for w in self._rows.winfo_children():
@@ -119,8 +134,16 @@ class InventoryView(ctk.CTkFrame):
                          ).grid(row=0, column=0, columnspan=6, pady=50)
             return
 
-        for idx, prod in enumerate(productos):
+        # Limitar renderizado a los primeros 100 para mantener fluidez
+        display_list = productos[:100]
+        
+        for idx, prod in enumerate(display_list):
             self._make_row(idx, prod, C.CARD if idx % 2 == 0 else "#f4f6f8")
+            
+        if len(productos) > 100:
+             ctk.CTkLabel(self._rows, text=f"... y {len(productos)-100} productos más (usa el buscador para filtrar)",
+                         font=ctk.CTkFont(size=12, slant="italic"), text_color=C.TEXT_HINT
+                         ).grid(row=201, column=0, columnspan=6, pady=10)
 
     def _make_row(self, idx, prod, bg):
         P = self.ROW_PAD

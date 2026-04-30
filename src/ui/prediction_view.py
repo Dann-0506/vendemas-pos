@@ -137,10 +137,42 @@ class PredictionView(ctk.CTkFrame):
     # ── Carga y filtrado — llama al controller ────────────────────────────────
 
     def load(self):
-        self._predicciones = self._ctrl.calcular_predicciones()
-        self._refresh_summary(self._ctrl.obtener_resumen())
+        """Carga datos de forma asíncrona para no bloquear la UI."""
+        self._show_loading(True)
+        
+        def _task():
+            try:
+                # Forzar recálculo la primera vez, el resumen usará ese cache
+                data = self._ctrl.calcular_predicciones(use_cache=False)
+                resumen = self._ctrl.obtener_resumen()
+                self.after(0, lambda: self._on_load_complete(data, resumen))
+            except Exception as e:
+                print(f"Error cargando predicciones: {e}")
+                self.after(0, lambda: self._show_error(str(e)))
+
+        threading.Thread(target=_task, daemon=True).start()
+
+    def _on_load_complete(self, data, resumen):
+        self._show_loading(False)
+        self._predicciones = data
+        self._refresh_summary(resumen)
         self._active_filter = "Todos"
         self._render(self._predicciones)
+
+    def _show_loading(self, show=True):
+        for w in self._rows.winfo_children():
+            w.destroy()
+        if show:
+            ctk.CTkLabel(self._rows, text="Calculando predicciones... por favor espera.",
+                         font=ctk.CTkFont(size=14), text_color=C.PRIMARY
+                         ).grid(row=0, column=0, columnspan=7, pady=100)
+
+    def _show_error(self, msg):
+        for w in self._rows.winfo_children():
+            w.destroy()
+        ctk.CTkLabel(self._rows, text=f"Error al calcular: {msg}",
+                     font=ctk.CTkFont(size=14), text_color=C.DANGER
+                     ).grid(row=0, column=0, columnspan=7, pady=100)
 
     def _apply_filter(self, filtro):
         self._active_filter = filtro
